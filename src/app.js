@@ -1,17 +1,17 @@
 const express = require("express");
 const app = express();
 
-app.use("/app",(req,res)=>{
-    res.send("app working well")
+
+app.get("/user",(req,res)=>{
+    res.send({firstName:"shri",lastName:"rakshe"})
 })
-app.use("/hello",(req,res)=>{
-    res.send("hello hello")
+
+app.post("/user",(req,res)=>{
+    res.send("save in db")
 })
-app.use("/test",(req,res)=>{
-    res.send("test working well")
-})
-app.use("/",(req,res)=>{
-    res.send("working well")
+
+app.delete("/user",(req,res)=>{
+    res.send("user delete in database")
 })
 app.listen(7777,(req,res)=>{
     console.log("server working well")
