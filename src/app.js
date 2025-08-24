@@ -1,18 +1,20 @@
 const express = require("express");
-const app = express();
+const { addmainAuth } = require("./middleware/auth"); // or default export
+// const addmainAuth = require("./middleware/auth"); // if using default export
 
+const app = express();   // ✅ define app first
 
-app.get("/user",(req,res)=>{
-    res.send({firstName:"shri",lastName:"rakshe"})
-})
+// use middleware AFTER defining app
+app.use("/admin", addmainAuth);
 
-app.post("/user",(req,res)=>{
-    res.send("save in db")
-})
+app.get("/admin/getdata", (req, res) => {
+  res.send("All data is sent");
+});
 
-app.delete("/user",(req,res)=>{
-    res.send("user delete in database")
-})
-app.listen(7777,(req,res)=>{
-    console.log("server working well")
-})
+app.get("/admin/deletedata", (req, res) => {
+  res.send("Data is deleted");
+});
+
+app.listen(7777, () => {
+  console.log("Server working well on port 7777");
+});
