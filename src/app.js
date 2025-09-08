@@ -7,7 +7,7 @@ app.use(express.json());
 app.post("/signup",async (req,res)=>{
   const user = new User(req.body)
   await user.save();
-  res.send("user add successfully")
+  res.send("user add successfully.")
 })
 
 connectDB()
