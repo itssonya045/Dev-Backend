@@ -10,6 +10,28 @@ app.post("/signup",async (req,res)=>{
   res.send("user add successfully.")
 })
 
+
+app.get("/feed",async(req,res)=>{
+  const user = await User.find({})
+  if(!user){
+    res.send("user not found")
+  }else{
+    res.send(user)
+  }
+})
+
+app.get("/user",async(req,res)=>{
+  const emailId = req.body.emailId
+  const user = await User.findOne({emailId:emailId})
+  if(!user){
+    res.send("user not found")
+  }else{
+    res.send(user)
+  }
+})
+
+
+
 connectDB()
   .then(() => {
     console.log("Successfully connected to database.");
