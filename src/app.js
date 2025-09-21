@@ -40,21 +40,42 @@ app.delete("/user",async(req,res)=>{
   }
 })
 
-app.patch("/user",async(req,res)=>{
-const userId = req.body.userId;
-const data = req.body;
-try{
-  const user = await User.findByIdAndUpdate(userId,data,
-    {returnDocument: "after",
-      runValidators :true
+app.patch("/user/:userId", async (req, res) => {
+  const userId = req.params.userId;
+  const data = req.body;
+
+  try {
+    const ALLOWED_UPDATES = ["photoUrl", "about", "gender", "age", "skills"];
+
+    //  Check if all update keys are allowed
+    const isUpdateAllowed = Object.keys(data).every((k) =>
+      ALLOWED_UPDATES.includes(k)
+    );
+    if (!isUpdateAllowed) {
+      return res.status(400).send({ error: "Update not allowed" });
     }
-    
-  )
-  res.send("user updated successfully.")
-}catch(err){
-  res.send("something went wrong.")
-}
-})
+
+    //  Validate skills length if present
+    if (data.skills && data.skills.length > 10) {
+      return res.status(400).send({ error: "Skills cannot be more than 10" });
+    }
+
+    // ✅ Update user
+    const user = await User.findByIdAndUpdate(userId, data, {
+      returnDocument: "after", // returns updated doc
+      runValidators: true,     // enforce schema validation
+    });
+
+    if (!user) {
+      return res.status(404).send({ error: "User not found" });
+    }
+
+    res.send({ message: "User updated successfully", user });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({ error: "Something went wrong" });
+  }
+});
 
 
 
