@@ -4,11 +4,18 @@ const app = express();
 const User = require("./models/user");
 
 app.use(express.json());
-app.post("/signup",async (req,res)=>{
-  const user = new User(req.body)
-  await user.save();
-  res.send("user add successfully.")
-})
+
+app.post("/signup", async (req, res) => {
+  try {
+    const user = new User(req.body);
+    await user.save();
+    res.send({ message: "User added successfully", user });
+  } catch (err) {
+   
+    res.status(400).send({ error: err.message});
+  }
+});
+
 
 
 app.get("/feed",async(req,res)=>{
