@@ -36,24 +36,29 @@ app.post("/signup", async (req, res) => {
 });
 
 
-app.post("/login",async(req,res)=>{
-   try{
-    const {emailId,password} = req.body
-  const user = await User.findOne({emailId : emailId})
+app.post("/login", async (req, res) => {
+  try {
+    const { emailId, password } = req.body;
 
-  if(!user){
-    throw new Error("Email is Not present")
+    // Check if user exists
+    const user = await User.findOne({ emailId });
+    if (!user) {
+      throw new Error("Email is not present");
+    }
+
+    // Check password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      throw new Error("Invalid password");
+    }
+
+    // If everything is correct
+    res.send({ message: "Login successful", user });
+  } catch (err) {
+    res.status(400).send({ error: err.message });
   }
+});
 
-  const isPasswordValid = await bcrypt.compare(password,user.password)
-
-  if(isPasswordValid){
-    res.send("login successfully.")
-  }
-}catch(err){
-  res.status(400).send("Error : " +err.message)
-}
-})
 
 app.get("/feed",async(req,res)=>{
   const user = await User.find({})
