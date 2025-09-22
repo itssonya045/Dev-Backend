@@ -4,9 +4,18 @@ const app = express();
 const User = require("./models/user");
 const {validData}=require("./utils/validationData")
 const bcrypt = require('bcrypt');
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken")
+const {userAuth} = require("./middleware/auth")
 
+app.use(express.json({
+  strict: true,
+  verify: (req, res, buf) => {
+    if (buf && buf.length === 0) req.body = {};
+  }
+}));
 
-app.use(express.json());
+app.use(cookieParser())
 
 app.post("/signup", async (req, res) => {
   try {
@@ -40,23 +49,40 @@ app.post("/login", async (req, res) => {
   try {
     const { emailId, password } = req.body;
 
-    // Check if user exists
     const user = await User.findOne({ emailId });
-    if (!user) {
-      throw new Error("Email is not present");
-    }
+    if (!user) throw new Error("Email is not present");
 
-    // Check password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      throw new Error("Invalid password");
-    }
+    const isPasswordValid = await user.validatepassword(password)
+    if (!isPasswordValid) throw new Error("Invalid password");
 
-    // If everything is correct
-    res.send({ message: "Login successful", user });
+    const token = await user.getJWT()
+
+    // Set cookie correctly
+    res.cookie("token", token, {
+      httpOnly: true,       // prevents JS access (XSS protection)
+      secure: false,        // true if HTTPS
+      sameSite: "lax",      // protects against CSRF
+      maxAge: 60 * 60 * 1000 // 1 hour
+    });
+
+    // Send user **without password**
+    const { password: pwd, ...userWithoutPassword } = user.toObject();
+
+    res.status(200).send({ message: "Login successful", user: userWithoutPassword });
+
   } catch (err) {
     res.status(400).send({ error: err.message });
   }
+});
+
+app.get("/profile", userAuth, (req, res) => {
+  // req.user comes from userAuth middleware
+  const { password, ...userWithoutPassword } = req.user.toObject();
+
+  res.status(200).send({
+    message: "Profile fetched successfully",
+    user: userWithoutPassword
+  });
 });
 
 

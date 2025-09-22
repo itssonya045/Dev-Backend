@@ -1,30 +1,38 @@
 
+const jwt = require("jsonwebtoken")
+const User = require("../models/user.js")
 
-const addmainAuth = (req, res, next) => {
-  const token = "xyz";
-  const adminToken = "xyz";
 
-  if (token !== adminToken) {
-    return res.status(400).send("Admin not available (invalid token)");
+
+
+const userAuth = async(req, res, next) => {
+
+  try{
+
+    const {token} =  req.cookies;
+
+    if(!token){
+      throw new Error ("token is not valid")
+    }
+
+    const decodedData =  await jwt.verify(token,"devtinder@123")
+
+    const {_id} = decodedData
+
+    const user = await User.findById(_id)
+
+    if(!user){
+      throw new Error ("user is not found")
+    }
+
+    req.user = user;
+    next()
+  }catch(err){
+    res.status(401).send({ error: err.message });
   }
 
-  next(); // ✅ continue if valid
 };
 
 
-
-
-const userAuth = (req, res, next) => {
-  const token = "xyz";
-  const adminToken = "xysz";
-
-  if (token !== adminToken) {
-    return res.status(400).send("Admin not available (invalid token)");
-  }
-
-  next();
-};
-
-// ✅ Option A: named export
-module.exports = { addmainAuth ,userAuth };
+module.exports = { userAuth };
 
