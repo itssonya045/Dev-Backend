@@ -1,5 +1,7 @@
 const validator = require("validator");
 
+
+
 const validData = (req) => {
   const { firstName, lastName, emailId, password } = req.body;
 
@@ -28,4 +30,20 @@ if (!strongPassword(password)) {
 
 };
 
-module.exports = { validData };
+
+
+const validateProfileData = (data = {}) => {
+  const allowedEditsFields = ["firstName", "lastName", "age", "gender", "skills", "photoUrl", "about"];
+
+  if (!data || typeof data !== "object") {
+    return false;
+  }
+
+  return Object.keys(data).every(field => allowedEditsFields.includes(field));
+};
+
+
+
+
+
+module.exports = { validData ,validateProfileData};
