@@ -47,7 +47,15 @@ const cookieParser = require("cookie-parser");
 const jwt = require("jsonwebtoken");
 
 // Body parsers — must be before routes
-app.use(express.json());
+app.use(express.json({
+  strict: true,
+  verify: (req, res, buf) => {
+    if (buf.length === 0) {
+      req.body = {}; // prevent crash on empty body
+    }
+  }
+}));
+
 app.use(express.urlencoded({ extended: true }));
 
 app.use(cookieParser());
@@ -55,9 +63,10 @@ app.use(cookieParser());
 // Import routers
 const appRouter = require("./routes/auth");
 const profileRouter = require("./routes/profile");
+const requestRouter = require("./routes/requestRouter")
 
 // Use routers
-app.use("/", appRouter, profileRouter);
+app.use("/", appRouter, profileRouter,requestRouter);
 
 connectDB()
   .then(() => {
