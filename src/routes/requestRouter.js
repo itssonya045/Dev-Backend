@@ -15,6 +15,16 @@ requestRouter.post("/request/send/:status/:toUserId", userAuth, async (req, res)
 
     }
 
+    const existingConnectionRequest = await ConnectionRequest.findOne({
+      $or:[
+        {fromUserId,toUserId},{fromUserId:toUserId,toUserId:fromUserId}
+      ]
+    })
+
+    if(existingConnectionRequest){
+      res.status(404).json({ message : "User Already Present ... !!!"})
+    }
+
     
 
     const connectionRequest = new ConnectionRequest({
