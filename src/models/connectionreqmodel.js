@@ -18,8 +18,19 @@ const connectionRequestSchema = new mongoose.Schema({
       message: "{VALUE} is not supported"
     },
     required: true
+  },
+
+
+},{timestamps:true});
+
+
+connectionRequestSchema.pre("save",function(){
+  const connectionRequest = this;
+
+  if(connectionRequest.fromUserId.equals(connectionRequest.toUserId)){
+    throw new Error ("Cannot send connection request Yourself")
   }
-});
+})
 
 const ConnectionRequest = mongoose.model("ConnectionRequest", connectionRequestSchema);
 
